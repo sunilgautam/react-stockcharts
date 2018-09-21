@@ -104,6 +104,14 @@ function drawOnCanvas(ctx, renko) {
 		ctx.rect(d.x, d.y, d.width, d.height);
 		ctx.closePath();
 		ctx.fill();
+
+		if (d.wick) {
+			// wick drawing
+			ctx.strokeStyle = d.wick.wickStroke;
+			ctx.fillStyle = d.wick.wickStroke;
+
+			ctx.fillRect(d.wick.x - 0.5, d.wick.y1, 1, d.wick.y2 - d.wick.y1);
+		}
 	});
 }
 
@@ -113,6 +121,7 @@ function getRenko(props, plotData, xScale, xAccessor, yScale, yAccessor) {
 		- xScale(xAccessor(plotData[0]));
 
 	const candleWidth = (width / (plotData.length - 1));
+	let prevWickValue;
 	const candles = plotData
 		.filter(d => isDefined(yAccessor(d).close))
 		.map(d => {
@@ -126,6 +135,20 @@ function getRenko(props, plotData, xScale, xAccessor, yScale, yAccessor) {
 				? (ohlc.open <= ohlc.close ? fill.up : fill.down)
 				: fill.partial;
 
+			const wickValue = Math.round(yScale(ohlc.open <= ohlc.close ? ohlc.low : ohlc.high));
+			let wick;
+			if (wickValue !== prevWickValue) {
+				prevWickValue = wickValue;
+				wick = {
+					x: xScale(xAccessor(d)),
+					wickStroke: svgfill,
+					y1: wickValue,
+					y2: y,
+					y3: y + height, // Math.round(yScale(Math.min(ohlc.open, ohlc.close))),
+					y4: Math.round(yScale(ohlc.low)),
+				};
+			}
+
 			return {
 				className: className,
 				fill: svgfill,
@@ -133,6 +156,7 @@ function getRenko(props, plotData, xScale, xAccessor, yScale, yAccessor) {
 				y: y,
 				height: height,
 				width: candleWidth,
+				wick,
 			};
 		});
 	return candles;
