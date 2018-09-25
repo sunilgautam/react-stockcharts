@@ -105,6 +105,8 @@ export const Renko = {
 	windowSize: 14,
 	fixedBrickSize: 2,
 	sourcePath: "high/low", // "close", "high/low"
+	continuousBrick: true,
+	eodUnfinishedBrick: false,
 	/* source: d => ({ high: d.high, low: d.low }),
 	dateAccessor: d => d.date,
 	dateMutator: (d, date) => { d.date = date; }, */

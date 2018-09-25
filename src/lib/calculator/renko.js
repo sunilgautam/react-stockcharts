@@ -13,7 +13,7 @@ export default function() {
 	let dateMutator = (d, date) => { d.date = date; };
 
 	function calculator(rawData) {
-		const { reversalType, fixedBrickSize, sourcePath, windowSize } = options;
+		const { reversalType, fixedBrickSize, sourcePath, windowSize, continuousBrick, eodUnfinishedBrick } = options;
 
 		const source = sourcePath === "high/low"
 			? d => { return { high: d.high, low: d.low }; }
@@ -42,6 +42,27 @@ export default function() {
 		let brick = {}, direction = 0;
 
 		rawData.forEach(function(d, idx) {
+			if (!continuousBrick && idx !== 0 && d.date.getDate() !== rawData[idx - 1].date.getDate()) {
+				// date changing
+				const prevRawData = rawData[idx - 1];
+
+				// collect prev unfinished brick
+				if (eodUnfinishedBrick && isNotDefined(brick.to)) {
+					brick.close = direction > 0 ? pricingMethod(prevRawData).high : pricingMethod(prevRawData).low;
+					brick.to = idx - 1;
+					brick.toDate = dateAccessor(prevRawData);
+					dateMutator(brick, dateAccessor(prevRawData));
+					brick.fullyFormed = false;
+					renkoData.push(brick);
+				}
+
+				// reset values to restart renko calculation for this day
+				prevBrickClose = d.open;
+				prevBrickOpen = d.open;
+				brick = {};
+				direction = 0;
+			}
+
 			if (isNotDefined(brick.from)) {
 				brick.high = d.high;
 				brick.low = d.low;
@@ -159,7 +180,6 @@ export default function() {
 					}
 				}
 			}
-
 		});
 		return renkoData;
 
