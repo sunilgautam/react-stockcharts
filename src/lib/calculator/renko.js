@@ -13,7 +13,7 @@ export default function() {
 	let dateMutator = (d, date) => { d.date = date; };
 
 	function calculator(rawData) {
-		const { reversalType, fixedBrickSize, sourcePath, windowSize, continuousBrick, eodUnfinishedBrick } = options;
+		const { reversalType, fixedBrickSize, sourcePath, windowSize, continuousBrick, eodUnfinishedBrick, brickNumbering } = options;
 
 		const source = sourcePath === "high/low"
 			? d => { return { high: d.high, low: d.low }; }
@@ -40,6 +40,7 @@ export default function() {
 
 		let index = 0, prevBrickClose = rawData[index].open, prevBrickOpen = rawData[index].open;
 		let brick = {}, direction = 0;
+		let brickNo = 0, prevDirection = 0;
 
 		rawData.forEach(function(d, idx) {
 			if (!continuousBrick && idx !== 0 && d.date.getDate() !== rawData[idx - 1].date.getDate()) {
@@ -61,6 +62,7 @@ export default function() {
 				prevBrickOpen = d.open;
 				brick = {};
 				direction = 0;
+				brickNo = 0;
 			}
 
 			if (isNotDefined(brick.from)) {
@@ -146,6 +148,18 @@ export default function() {
 						// brick.diff = brick.open - brick.close;
 						// brick.atr = d.atr;
 						brick.fullyFormed = true;
+
+						// brick numbering
+						if (prevDirection === direction) {
+							brickNo += 1;
+						} else {
+							brickNo = 1;
+							prevDirection = direction;
+						}
+						if (brickNumbering) {
+							brick.brickNo = brickNo;
+						}
+
 						renkoData.push(brick);
 
 						prevBrickClose = brick.close;

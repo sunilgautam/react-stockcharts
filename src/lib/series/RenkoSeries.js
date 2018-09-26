@@ -112,6 +112,14 @@ function drawOnCanvas(ctx, renko) {
 
 			ctx.fillRect(d.wick.x - 0.5, d.wick.y1, 1, d.wick.y2 - d.wick.y1);
 		}
+
+		if (d.brickNo) {
+			ctx.fillStyle = "#FFF200";
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.font = "bold 10px Helvetica Neue, Helvetica, Arial, sans-serif",
+			ctx.fillText(d.brickNo, d.x + (d.width / 2), d.y + (d.height / 2));
+		}
 	});
 }
 
@@ -157,6 +165,7 @@ function getRenko(props, plotData, xScale, xAccessor, yScale, yAccessor) {
 				height: height,
 				width: candleWidth,
 				wick,
+				brickNo: d.brickNo,
 			};
 		});
 	return candles;
