@@ -3,6 +3,7 @@
 
 export { default as Annotate } from "./Annotate";
 export { default as LabelAnnotation } from "./LabelAnnotation";
+export { default as BarAnnotation } from "./BarAnnotation";
 export { default as SvgPathAnnotation } from "./SvgPathAnnotation";
 export { default as Label } from "./Label";
 
